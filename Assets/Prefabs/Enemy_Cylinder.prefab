@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4269217405976945466}
   - component: {fileID: 6458196011184221156}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: Enemy_Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -148,5 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1c79536ace2ab240bab395c83b27f13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _speed: 5
-  _lifetime: 5
+  _speed: 3
+  _lifetime: 10
+  _reachDistance: 2

@@ -12,20 +12,20 @@ public class EnemyPool : MonoBehaviour
     {
         for (int index = 0; index < _initialSize; index++)
         {
-            _availableEnemies.Enqueue(CreateEnemy());
+            _availableEnemies.Enqueue(Create());
         }
     }
 
-    public Enemy GetEnemy()
+    public Enemy Get()
     {
-        Enemy enemy = _availableEnemies.Count > 0 ? _availableEnemies.Dequeue() : CreateEnemy();
+        Enemy enemy = _availableEnemies.Count > 0 ? _availableEnemies.Dequeue() : Create();
 
         enemy.gameObject.SetActive(true);
 
         return enemy;
     }
 
-    public void ReturnEnemy(Enemy enemy)
+    public void Return(Enemy enemy)
     {
         if (enemy.gameObject.activeSelf == false)
         {
@@ -37,7 +37,7 @@ public class EnemyPool : MonoBehaviour
         _availableEnemies.Enqueue(enemy);
     }
 
-    private Enemy CreateEnemy()
+    private Enemy Create()
     {
         Enemy enemy = Instantiate(_enemyPrefab, transform);
         enemy.gameObject.SetActive(false);

@@ -7,12 +7,14 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed = 5f;
     [SerializeField, Min(0.1f)] private float _lifetime = 5f;
+    [SerializeField, Min(0.01f)] private float _reachDistance = 1f;
 
-    public event Action<Enemy> LifetimeOver;
+    public event Action<Enemy> ReturnRequested;
 
     private Rigidbody _rigidbody;
-    private Vector3 _moveDirection = Vector3.forward;
     private Coroutine _lifetimeCoroutine;
+    private Transform _targetTransform;
+
 
     private void Awake()
     {
@@ -21,17 +23,13 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Vector3 velocity = _rigidbody.velocity;
-
-        velocity.x = _moveDirection.x * _speed;
-        velocity.z = _moveDirection.z * _speed;
-
-        _rigidbody.velocity = velocity;
+        MoveToTarget();
+        CheckTargetCompleted();
     }
 
-    public void Initialize(Vector3 direction)
+    public void Initialize(Transform targetTransform)
     {
-        _moveDirection = direction.normalized;
+        _targetTransform = targetTransform;
 
         if (_lifetimeCoroutine != null)
         {
@@ -53,10 +51,53 @@ public class Enemy : MonoBehaviour
         _rigidbody.angularVelocity = Vector3.zero;
     }
 
+    private void MoveToTarget()
+    {
+        if (_targetTransform == null)
+        {
+            return;
+        }
+
+        Vector3 direction = (_targetTransform.position - gameObject.transform.position).normalized;
+
+        Vector3 velocity = _rigidbody.velocity;
+        velocity.x = direction.x * _speed;
+        velocity.z = direction.z * _speed;
+
+        _rigidbody.velocity = velocity;
+    }
+
+    private void RequestReturn()
+    {
+        if (_lifetimeCoroutine != null)
+        {
+            StopCoroutine(_lifetimeCoroutine);
+            _lifetimeCoroutine = null;
+        }
+
+        ReturnRequested?.Invoke(this);
+    }
+
     private IEnumerator LifetimeRoutine()
     {
         yield return new WaitForSeconds(_lifetime);
-        LifetimeOver?.Invoke(this);
-        _lifetimeCoroutine = null;
+        RequestReturn();
+    }
+
+    private void CheckTargetCompleted()
+    {
+        if (_targetTransform == null)
+        {
+            Debug.LogWarning("Нет цели для движения", this);
+            return;
+        }
+
+        Vector3 direction = _targetTransform.position - transform.position;
+        direction.y = 0f;
+
+        if (direction.magnitude <= _reachDistance)
+        {
+            RequestReturn();
+        }
     }
 }
