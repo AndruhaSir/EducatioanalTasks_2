@@ -37,7 +37,8 @@ public class EnemySpawner : MonoBehaviour
     private IEnumerator SpawnEnemies()
     {
         var wait = new WaitForSeconds(_spawnInterval);
-        while (true)
+
+        while (enabled)
         {
             SpawnEnemy();
             yield return wait;
@@ -49,6 +50,18 @@ public class EnemySpawner : MonoBehaviour
         Transform point = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
         Vector3 direction = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) * Vector3.forward;
 
-        _enemyPool.GetEnemy(point.position, direction);
+        Enemy enemy = _enemyPool.GetEnemy();
+
+        enemy.transform.position = point.position;
+        enemy.transform.rotation = Quaternion.LookRotation(direction);
+        enemy.Initialize(direction);
+
+        enemy.LifetimeOver += ReturnEnemy;
+    }
+
+    private void ReturnEnemy(Enemy enemy)
+    {
+        enemy.LifetimeOver -= ReturnEnemy;
+        _enemyPool.ReturnEnemy(enemy);
     }
 }

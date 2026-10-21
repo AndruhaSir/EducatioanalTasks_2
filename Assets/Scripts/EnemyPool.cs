@@ -16,21 +16,18 @@ public class EnemyPool : MonoBehaviour
         }
     }
 
-    public Enemy GetEnemy(Vector3 position, Vector3 direction)
+    public Enemy GetEnemy()
     {
         Enemy enemy = _availableEnemies.Count > 0 ? _availableEnemies.Dequeue() : CreateEnemy();
 
-        enemy.transform.position = position;
-        enemy.transform.rotation = Quaternion.LookRotation(direction);
         enemy.gameObject.SetActive(true);
-        enemy.Initialize(this, direction);
 
         return enemy;
     }
 
     public void ReturnEnemy(Enemy enemy)
     {
-        if (!enemy.gameObject.activeSelf)
+        if (enemy.gameObject.activeSelf == false)
         {
             return;
         }

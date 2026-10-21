@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -7,27 +8,15 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float _speed = 5f;
     [SerializeField, Min(0.1f)] private float _lifetime = 5f;
 
+    public event Action<Enemy> LifetimeOver;
+
     private Rigidbody _rigidbody;
-    private EnemyPool _pool;
     private Vector3 _moveDirection = Vector3.forward;
     private Coroutine _lifetimeCoroutine;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
-    }
-
-    public void Initialize(EnemyPool pool, Vector3 direction)
-    {
-        _pool = pool;
-        _moveDirection = direction.normalized;
-
-        if (_lifetimeCoroutine != null)
-        {
-            StopCoroutine(_lifetimeCoroutine);
-        }
-
-        _lifetimeCoroutine = StartCoroutine(LifetimeRoutine());
     }
 
     private void FixedUpdate()
@@ -38,6 +27,18 @@ public class Enemy : MonoBehaviour
         velocity.z = _moveDirection.z * _speed;
 
         _rigidbody.velocity = velocity;
+    }
+
+    public void Initialize(Vector3 direction)
+    {
+        _moveDirection = direction.normalized;
+
+        if (_lifetimeCoroutine != null)
+        {
+            StopCoroutine(_lifetimeCoroutine);
+        }
+
+        _lifetimeCoroutine = StartCoroutine(LifetimeRoutine());
     }
 
     public void ResetState()
@@ -55,7 +56,7 @@ public class Enemy : MonoBehaviour
     private IEnumerator LifetimeRoutine()
     {
         yield return new WaitForSeconds(_lifetime);
-        _pool.ReturnEnemy(this);
+        LifetimeOver?.Invoke(this);
         _lifetimeCoroutine = null;
     }
 }
