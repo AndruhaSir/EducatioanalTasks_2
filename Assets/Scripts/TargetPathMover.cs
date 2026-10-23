@@ -8,12 +8,7 @@ public class TargetPathMover : MonoBehaviour
 
     private int _currentWaypointIndex;
 
-    private void Update()
-    {
-        MoveToNextPoint();
-    }
-
-    private void MoveToNextPoint()
+    public void MoveToNextPoint()
     {
         if (_waypoints == null || _waypoints.Length == 0)
         {
@@ -22,9 +17,16 @@ public class TargetPathMover : MonoBehaviour
 
         Transform targetWaypoint = _waypoints[_currentWaypointIndex];
 
-        transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, _speed * Time.deltaTime);
+        if (targetWaypoint == null)
+        {
+            return;
+        }
 
-        if (Vector3.Distance(transform.position, targetWaypoint.position) <= _reachDistance)
+        transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position_speed * Time.deltaTime);
+
+        Vector3 offset = targetWaypoint.position - transform.position;
+
+        if (offset.sqrMagnitude <= _reachDistance * _reachDistance)
         {
             _currentWaypointIndex = ++_currentWaypointIndex % _waypoints.Length;
         }

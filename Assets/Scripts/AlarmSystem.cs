@@ -1,36 +1,54 @@
-
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AlarmSystem : MonoBehaviour
 {
-    [SerializeField] private AudioSource _audioSource;
-    [SerializeField] private SoundPlayer _soundPlayer;
+    [SerializeField] private IntruderDetector _enemyDetector;
+    [SerializeField] private AlarmSound _alarmSound;
 
-    private int _countIntruders;
+    private readonly HashSet<Enemy> _intruders = new HashSet<Enemy>();
 
-    private void OnTriggerEnter(Collider other)
+    private void OnEnable()
     {
-        if (other.TryGetComponent<Enemy>(out Enemy enemy))
+        if (_enemyDetector == null)
         {
-            _countIntruders++;
+            return;
+        }
 
-            if (_countIntruders == 1)
-            {
-                _soundPlayer.PlaySoundSmoothly(_audioSource);
-            }
+        _enemyDetector.IntruderEntered += OnIntruderEntered;
+        _enemyDetector.IntruderExited += OnIntruderExited;
+    }
+
+    private void OnDisable()
+    {
+        if (_enemyDetector == null)
+        {
+            return;
+        }
+
+        _enemyDetector.IntruderEntered -= OnIntruderEntered;
+        _enemyDetector.IntruderExited -= OnIntruderExited;
+    }
+
+    private void OnIntruderEntered(Enemy enemy)
+    {
+        bool wasEmpty = _intruders.Count == 0;
+
+        _intruders.Add(enemy);
+
+        if (wasEmpty && _intruders.Count > 0)
+        {
+            _alarmSound.StartAlarm();
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnIntruderExited(Enemy enemy)
     {
-        if (other.TryGetComponent<Enemy>(out Enemy enemy))
-        {
-            _countIntruders--;
+        _intruders.Remove(enemy);
 
-            if (_countIntruders == 0)
-            {
-                _soundPlayer.StopSoundSmoothly(_audioSource);
-            }
+        if (_intruders.Count == 0)
+        {
+            _alarmSound.StopAlarm();
         }
     }
 }
