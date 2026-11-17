@@ -1,15 +1,21 @@
 using System.Collections;
 using UnityEngine;
 
-public class CubeSpawner : MonoBehaviour
+public class CubeSpawner : Spawner<Cube>
 {
     [SerializeField] private CubePool _cubePool;
     [SerializeField] private Transform _mainPlatform;
     [SerializeField, Min(0.05f)] private float _spawnInterval = 0.5f;
     [SerializeField, Min(0f)] private float _spawnAreaSize = 4f;
-    [SerializeField] private GameObject _upperSpawnPont;
+    [SerializeField] private GameObject _upperSpawnPoint;
 
     private Coroutine _spawnCoroutine;
+
+    protected override int SpawnedCount => _cubePool.SpawnedCount;
+    protected override int CreatedCount => _cubePool.CreatedCount;
+    protected override int ActiveCount => _cubePool.ActiveCount;
+    protected override int StatisticsOrder => 0;
+    protected override string DisplayName => "Кубы";
 
     private void OnEnable()
     {
@@ -27,7 +33,7 @@ public class CubeSpawner : MonoBehaviour
 
     private void OnValidate()
     {
-        if(_upperSpawnPont == null || _mainPlatform == null || _cubePool == null)
+        if (_upperSpawnPoint == null || _mainPlatform == null || _cubePool == null)
         {
             Debug.Log("Не все компоненты подключены");
         }
@@ -48,7 +54,7 @@ public class CubeSpawner : MonoBehaviour
 
         Vector3 spawnPosition = new Vector3(
             platformPosition.x + Random.Range(-_spawnAreaSize, _spawnAreaSize),
-            platformPosition.y + _upperSpawnPont.transform.position.y,
+            platformPosition.y + _upperSpawnPoint.transform.position.y,
             platformPosition.z + Random.Range(-_spawnAreaSize, _spawnAreaSize)
         );
 
